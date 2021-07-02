@@ -50,3 +50,24 @@ result_sum2
 # %% [markdown]
 # ## 極値，代表値の算出
 # %%
+# 集約関数を使用してシンプルに実装する．
+# total_priceの最大値・最小値・平均・中央値，20パーセンタイル点
+result = reserve_tb.groupby('hotel_id').agg({'total_price':['max', 'min', 'mean', 'median', lambda x : np.percentile(x, q=20)]}).reset_index()
+result
+# %%
+# 結果の列名を指定して表示する
+result.columns = ['hotel_id', 'price_max', 'price_min', 'price_mean', 'price_median', 'price_20per']
+result
+# %%
+# agg関数は列ごとに異なった処理も可能
+result2 = reserve_tb.groupby('hotel_id').agg({'total_price':['max'], 'people_num':['mean']}).reset_index()
+result2
+# %%
+# 集約関数で不偏分散と不偏標準偏差を算出
+result = reserve_tb.groupby('hotel_id').agg({'total_price':['var', 'std']}).reset_index()
+result.columns = ['hotel_id', 'price_var', 'price_std']
+# NaNが発生した場合はその部分を0で埋める．
+result.fillna(0, inplace=True)
+result
+# %% [markdown]
+### 最頻値の算出

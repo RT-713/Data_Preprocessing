@@ -20,8 +20,7 @@ select hotel_id,
        percentile_cont(0.5) within group(order by total_price) as c_median,
        percentile_cont(0.2) within group(order by total_price) as c_20per
 from reserve_tb
-group by hotel_id 
-;
+group by hotel_id;
 /*
 大規模データなどで処理が重い場合は，approximate percentile_disc関数を使ってもOK
 ・approximate percentile_disc関数はパーセンタイル値を近似的に出力する（相対誤差が0.5%程度だが高速）
@@ -33,5 +32,23 @@ from reserve_tb
 group by hotel_id 
 ; 
  */
+
+-- 不偏分散・不偏標準偏差の算出
+-- coalence関数は引数のうち，NULLでない最初の引数を返す（今回はデータが1個の場合は0に置き換えるように実装）
+-- 実装時はNULLを返さない（列に発生させないように）注意する
+select hotel_id, 
+	coalesce(variance(total_price), 0) as price_var,
+	coalesce(stddev(total_price), 0) as price_std
+from reserve_tb
+group by hotel_id;
+
+-- この実装だとデータ数が1の時NULLを返す（不偏分散・標準偏差はn-1が式に含まれているため）
+select hotel_id, 
+	variance(total_price) as price_var,
+	stddev(total_price) as price_std
+from reserve_tb
+group by hotel_id;
+
+
 
 
