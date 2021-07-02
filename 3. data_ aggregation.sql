@@ -49,6 +49,22 @@ select hotel_id,
 from reserve_tb
 group by hotel_id;
 
+-- 最頻値の算出
+-- round関数による四捨五入
+select round(total_price, -3) as total_price_round
+from reserve_tb
+group by total_price_round
+order by count(*) desc
+limit 2;
 
 
+-- Window関数
+select *, 
+row_number() over (partition by customer_id order by reserve_datetime) as log_no
+from reserve_tb;
+
+select hotel_id, 
+rank() over (order by count(*) desc) as rsv_cnt_rank
+from reserve_tb
+group by hotel_id;
 

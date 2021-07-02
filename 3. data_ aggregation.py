@@ -70,4 +70,15 @@ result.columns = ['hotel_id', 'price_var', 'price_std']
 result.fillna(0, inplace=True)
 result
 # %% [markdown]
-### 最頻値の算出
+### 最頻値・順位の算出
+# %%
+# 最頻値を算出したい対象列を指定して，round関数で四捨五入，mode関数で最頻値を算出
+reserve_tb['total_price'].round(-3).mode()
+# %%
+# 順位を算出するにはrank関数を使用する
+# rank関数を適用するためにまずdatetime型に変換（rank関数は文字列型に対応していない）
+reserve_tb['reserve_datetime'] = pd.to_datetime(reserve_tb['reserve_datetime'], format='%Y-%m-%d %H:%M:%S')'
+# %%
+reserve_tb['log_no'] = reserve_tb.groupby('customer_id')['reserve_datetime'].rank(ascending=True, method='first')
+reserve_tb
+# %%
