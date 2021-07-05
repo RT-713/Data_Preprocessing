@@ -77,8 +77,18 @@ reserve_tb['total_price'].round(-3).mode()
 # %%
 # 順位を算出するにはrank関数を使用する
 # rank関数を適用するためにまずdatetime型に変換（rank関数は文字列型に対応していない）
-reserve_tb['reserve_datetime'] = pd.to_datetime(reserve_tb['reserve_datetime'], format='%Y-%m-%d %H:%M:%S')'
+reserve_tb['reserve_datetime'] = pd.to_datetime(reserve_tb['reserve_datetime'], format='%Y-%m-%d %H:%M:%S')
 # %%
 reserve_tb['log_no'] = reserve_tb.groupby('customer_id')['reserve_datetime'].rank(ascending=True, method='first')
 reserve_tb
+# %%
+# ランキング付け（予約回数をもとに順位を計算）
+rsv_cnt_tb = reserve_tb.groupby('hotel_id').size().reset_index()
+rsv_cnt_tb.columns = ['hotel_id', 'rsv_cnt']
+rsv_cnt_tb['rsv_cnt_tank'] = rsv_cnt_tb['rsv_cnt'].rank(ascending=False, method='min')
+rsv_cnt_tb
+# %%
+# 一時的に作成した列を削除
+rsv_cnt_tb.drop('rsv_cnt', axis=1, inplace=True)
+rsv_cnt_tb
 # %%
