@@ -45,6 +45,24 @@ on s_area_mst.join_area_id = r_hotel_mst.join_area_id
 and hotels.hotel_id != r_hotel_mst.rec_hotel_id;
 
 -- n件前のデータ取得
+-- lag関数はn件前のデータを取得する関数lag(列名，n)
+SELECT *,
+	LAG(TOTAL_PRICE,2) OVER(PARTITION BY CUSTOMER_ID ORDER BY RESERVE_DATETIME) AS BEFORE_PRICE
+FROM RESERVE_TB;
 
+-- lead関数はn件後のデータを取得
+SELECT *,
+	LEAD(TOTAL_PRICE,3) OVER(PARTITION BY CUSTOMER_ID ORDER BY RESERVE_DATETIME) AS FORMER_PRICE
+FROM RESERVE_TB;
 
+-- 過去n件の合計値を算出
+-- 検索CASE式を使用．（CASE <対象> WHEN <条件> THEN <処理> ELSE <条件外の処理> END）
+-- 後ろn件としたい場合は「2 preceding -> 2 following」に変更すればOK
+select *,
+case when -- rows between <開始行> and <終了行> が文法（前2行から現在の行までが3行の場合，then以下の処理を実行）
+count(total_price) over(partition by customer_id order by reserve_datetime rows between 2 preceding and current row) = 3
+then
+sum(total_price) over(partition by customer_id order by reserve_datetime rows between 2 preceding and current row)
+else null end as price_sum-- 条件外の時はnullを入れる
+from reserve_tb;
 
