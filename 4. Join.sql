@@ -66,3 +66,8 @@ sum(total_price) over(partition by customer_id order by reserve_datetime rows be
 else null end as price_sum-- 条件外の時はnullを入れる
 from reserve_tb;
 
+-- データの全結合（cross join）
+
+
+
+
