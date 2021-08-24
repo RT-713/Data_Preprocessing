@@ -1,5 +1,5 @@
 # %% [markdown]
-# ## 生成
+# ## 6. 生成
 # - オーバーサンプリング
 # - アンダーサンプリング
 # %%
@@ -28,3 +28,27 @@ balance_data, balance_target = sm.fit_resample(production_tb[['length', 'thickne
 # %%
 # 同一の数までオーバーサンプリングできている
 pd.DataFrame(balance_target).query('fault_flg == True').count()
+# %% [markdown]
+# ## 7. データ集計結果の展開
+# #### 縦持ち・横持ちの変換
+# %%
+reserve_tb = pd.read_csv('./data/reserve.csv')
+reserve_tb.head()
+# %%
+# pivot_table関数で実装
+pd.pivot_table(reserve_tb, index='customer_id', columns='people_num', values='reserve_id', aggfunc=lambda x: len(x), fill_value=0)
+# %% [markdown]
+# ### 疎行列への変換
+# %%
+from scipy.sparse import csc_matrix
+
+cnt_tb = reserve_tb.groupby(['customer_id', 'people_num'])['reserve_id'].size().reset_index()
+cnt_tb.columns = ['customer_id', 'people_num', 'rsv_cnt']
+cnt_tb
+# %%
+# customer_idをカテゴリー型へ変換
+customer_id = pd.Categorical((cnt_tb['customer_id']))
+people_num = pd.Categorical((cnt_tb['people_num']))
+
+csc_matrix((cnt_tb['rsv_cnt'], (customer_id.codes, people_num.codes)), shape=(len(customer_id.categories), len (people_num.categories)))
+# %%
